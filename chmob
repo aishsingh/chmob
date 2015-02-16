@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Returns the files permission as symbols
+getPerm () { 
+    ls -a -l $1 | awk 'NR==1 {print substr($1,2);}';
+} 
+
+# Converts symbol perm to a number value
+permToNum () { 
+    # extract chars from perm in to an array
+    chars=$(echo "$1" | awk '
+                { 
+                    split($0, chars, "")
+                    for (i=1; i <= length($0); i++) {
+                        printf("%s\n", chars[i])
+                    }
+                }')
+
+    index=1
+    user_perm=0
+    group_perm=0
+    other_perm=0
+    for i in $chars; do
+        num=0
+        case $i in
+            "r")
+                ((num=4))
+                ;;
+            "w")
+                ((num=2))
+                ;;
+            "x")
+                ((num=1))
+                ;;
+        esac
+
+        if [[ $index > 0 && $index -le 3 ]]; then
+            ((user_perm+=$num))
+
+        elif [[ $index > 3 && $index -le 6 ]]; then
+            ((group_perm+=$num))
+
+        elif [[ $index > 6 && $index -le 9 ]]; then
+            ((other_perm+=$num))
+        fi
+        ((index++))
+    done
+    echo $user_perm$group_perm$other_perm;
+} 
+
+# Interactively set perm
+# TODO
+setPermInteractive () { 
+    echo "[$1]"
+    perm_num=$(permToNum $perm_symbol)
+    echo "[$perm_num]";
+} 
+
+if [[ "$1" = "-h" ]]; then
+    echo "Usage: chmob [option] [file]"
+    echo -e "\r"
+    echo "Options:"
+    echo "  -h         Shows this help page"
+    echo "  -r         Read file permission as symbols"
+    echo "  -R         Read file permission as a number"
+    echo "  -p         Set file permission"
+    # echo "     --i     Interactive input (Only with -p)"
+    echo -e "\r"
+    echo "chmob v1.0 - March 2015"
+    echo "Aishwarya Singh"
+    echo "http://github.com/aishsingh"
+
+elif [[ "$1" = "-r" ]]; then
+    if [[ $2 ]]; then
+        echo $(getPerm $2)
+    else
+        echo "no file specified."
+    fi
+
+elif [[ "$1" = "-R" ]]; then
+    if [[ $2 ]]; then
+        perm_symbol=$(getPerm $2)
+        echo $(permToNum $perm_symbol)
+    else
+        echo "no file specified."
+    fi
+
+elif [[ "$1" = "-p" ]]; then
+    if [[ $2 ]]; then
+        # if [[ "$2" = "--i" ]]; then
+        #     perm_symbol=$(getPerm $3)
+        #     setPermInteractive $perm_symbol
+        # else
+            read -n 9 i
+            perm=$(permToNum $i)
+            chmod $perm $2
+        # fi
+    else
+        echo "no file specified."
+    fi
+fi
+
+
