@@ -15,16 +15,16 @@ Options:
 ## Sample
 Read current file permissions
 ```
-# chmob -r myfile.txt
+$ chmob -r myfile.txt
 rw-rw-rw-
 ```
 Change permissions
 ```
-# chmob -p myfile.txt
+$ chmob -p myfile.txt
 rw-r
 ```
 Check if permissions have changed
 ```
-# chmob -r myfile.txt
+$ chmob -r myfile.txt
 rw-r-----
 ```
